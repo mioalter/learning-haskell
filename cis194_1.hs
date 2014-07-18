@@ -1,24 +1,12 @@
 
+-- Credit card number validation
+-- We want to: 
+-- (1) convert an integer (credit card number) to a list of digits
+-- (2) double every second digit starting from the right
+-- (3) sum all resulting digits, meaning, if any digits double to two-digit numbers, sum the digits of those, too
+-- (4) validate: the sum must be 0 mod 10 to be valid
+
 ---Exercise 1
---v1
---headDigit :: Integer -> Integer
---headDigit n = read (take 1 (show n)) :: Integer
-
---tailDigits :: Integer -> Integer
---tailDigits n = read (drop 1 (show n)) :: Integer
----breaks for integers with < 2 digits, but that's okay because 
----innerToDigits does the checking
-
----broken! have head and tail return strings and only cast as a list of integers at the end!!
----maybe make headDigit and tailDigits of type Integer --> [[Char]]
-
---innerToDigits :: Integer -> [Integer]
---innerToDigits n = if n `elem` [0..9] then [n] else (headDigit n) : innerToDigits (tailDigits n)
-
---toDigits :: Integer -> [Integer]
---toDigits n = if n < 1 then [] else innerToDigits n
-
---v2
 innerToDigits :: [Char] -> [[Char]]
 innerToDigits n = if length(n)==1 then [n] else [(head n)] : innerToDigits (tail n)
 --note: 
