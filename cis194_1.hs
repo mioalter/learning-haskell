@@ -32,7 +32,7 @@ doubleEveryOther xs = reverse (doubleEveryOtherLeft (reverse xs))
 sumDigits :: [Integer] -> Integer
 sumDigits [] = 0
 sumDigits [x] = sum (toDigits x)
-sumDigits (x:xs) = (sum (toDigits x)) + sumDigits xs
+sumDigits (x:xs) = sumDigits [x] + sumDigits xs
 
 ---Exercise 4
 validate :: Integer -> Bool
