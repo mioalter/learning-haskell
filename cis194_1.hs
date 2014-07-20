@@ -38,3 +38,23 @@ sumDigits (x:xs) = sumDigits [x] + sumDigits xs
 validate :: Integer -> Bool
 validate n = sumDigits (doubleEveryOther (toDigits n)) `mod` 10 == 0
 
+--Towers of Hanoi
+-- Note: if hanoi n a b c is the solution for n>3 discs starting on peg a and ending on peg c
+-- then 
+-- hanoi n a b c is: 
+-- (i) move the (n-1) top discs from a to c, 
+-- (ii) move the biggest disc from a to b, 
+-- (iii) move the (n-1) discs from c to a
+-- (iv) move the biggest disc from b to c
+-- (v) move the (n-1) discs from a to c
+--Exercise 5
+type Peg = String
+type Move = (Peg,Peg)
+hanoi :: Integer -> Peg -> Peg -> Peg -> [Move]
+hanoi 1 a b c = [(a,c)]
+hanoi 2 a b c = [(a,b), (a,c), (b,c)]
+hanoi 3 a b c = [(a,c), (a,b), (c,b), (a,c), (b,a), (b,c), (a,c)]
+hanoi n a b c = concat [hanoi (n-1) a b c, [(a,b)], hanoi (n-1) c b a, [(b,c)], hanoi (n-1) a b c]
+
+
+
