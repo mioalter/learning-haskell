@@ -31,3 +31,8 @@ parseMessage ('W':xs) = LogMessage Warning (nthToInt 1 xs) (restToString 1 xs)
 parseMessage ('E':xs) = LogMessage (Error (nthToInt 1 xs)) (nthToInt 2 xs) (restToString 2 xs)
 parseMessage _ = Unknown "This is not in the right format"
 
+parse :: String -> [LogMessage]
+parse s = [ parseMessage x | x <- lines s ]
+
+--Exercise 2
+insert :: LogMessage -> MessageTree -> MessageTree
