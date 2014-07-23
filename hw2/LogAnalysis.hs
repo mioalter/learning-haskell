@@ -34,5 +34,40 @@ parseMessage _ = Unknown "This is not in the right format"
 parse :: String -> [LogMessage]
 parse s = [ parseMessage x | x <- lines s ]
 
---Exercise 2
+--Exercise 2: Organize error message in a message tree, write a function to insert new messages
+getTime :: LogMessage -> Int
+getTime (Unknown _) = (-1)
+getTime (LogMessage (Error _) x _) = x
+getTime (LogMessage _ x _) = x
+
 insert :: LogMessage -> MessageTree -> MessageTree
+insert (Unknown _) m = m
+insert l Leaf = Node Leaf l Leaf
+insert l (Node Leaf root Leaf) = if getTime l >= getTime root then Node Leaf root (insert l Leaf) else Node (insert l Leaf) root Leaf
+insert l (Node lTree root rTree) = if getTime l >= getTime root then Node lTree root (insert l rTree) else Node (insert l lTree) root rTree
+
+--Exercise 3: write a function to build up a tree by successively inserting
+build :: [LogMessage] -> MessageTree
+build [] = Leaf
+build [x] = insert x Leaf
+build (x:xs) = insert x (build xs)
+
+--Exercise 4: write a function that takes a sorted MessageTree and returns a list of log messages sorted by timestamp
+inOrder :: MessageTree -> [LogMessage]
+inOrder Leaf = []
+inOrder (Node lTree msg rTree) = (inOrder lTree) ++ [msg] ++ (inOrder rTree)
+
+--Exercise 5: write a function that takes an unsorted list of log messages and returns a sorted list of only those
+--error messages with severity > 50.
+msgIsError :: LogMessage -> Bool
+msgIsError (LogMessage (Error _) _ _) = True
+msgIsError (LogMessage _ _ _) = False
+msgIsError (Unknown _) = False
+
+whatWentWrong :: [LogMessage] -> [String]
+whatWentWrong =  (map show) . (filter msgIsError) . inOrder . build
+
+
+
+
+
