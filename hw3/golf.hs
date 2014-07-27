@@ -9,10 +9,6 @@ import Data.Maybe
 --The second list in the output should contain every second element from the input list. . . 
 --and the nth list in the output should contain every nth element from the input list.
 
---take' :: Int -> [a] -> Maybe [a]
---take' n [] = Nothing
---take' n (x:xs) = Just (drop (n-1) xs)
-
 unsafeTakeNth :: Int -> [a] -> a
 unsafeTakeNth n = head . drop (n-1) . take n
 
