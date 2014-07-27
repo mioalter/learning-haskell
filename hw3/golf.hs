@@ -21,12 +21,13 @@ takeNth n xs
 	| length xs < n || length xs < 1 = Nothing
 	| otherwise = Just (unsafeTakeNth n xs)
 
-takeEveryNth :: Int -> [a] -> [Maybe a]
-takeEveryNth n xs
+takeEveryNthMaybe :: Int -> [a] -> [Maybe a]
+takeEveryNthMaybe n xs
 	| length xs < n || length xs < 1 = [Nothing] 
-	| otherwise = (takeNth n xs) : takeEveryNth n (drop n xs)
+	| otherwise = (takeNth n xs) : takeEveryNthMaybe n (drop n xs)
 
-takeEveryNthComplete :: Int -> [a] -> [a]
-takeEveryNthComplete n xs = map fromJust (filter isJust (takeEveryNth n xs))
+takeEveryNth :: Int -> [a] -> [a]
+takeEveryNth n xs = map fromJust (filter isJust (takeEveryNthMaybe n xs))
 
---skips :: [a] -> [[a]]
+skips :: [a] -> [[a]]
+skips xs = [takeEveryNth n xs | n<-[1..length xs]]
