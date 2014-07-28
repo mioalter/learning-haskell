@@ -12,18 +12,18 @@ import Data.Maybe
 unsafeTakeNth :: Int -> [a] -> a
 unsafeTakeNth n = head . drop (n-1) . take n
 
-takeNth :: Int -> [a] -> Maybe a
-takeNth n xs
+takeNthMaybe :: Int -> [a] -> Maybe a
+takeNthMaybe n xs
 	| length xs < n || length xs < 1 = Nothing
 	| otherwise = Just (unsafeTakeNth n xs)
 
 takeEveryNthMaybe :: Int -> [a] -> [Maybe a]
 takeEveryNthMaybe n xs
 	| length xs < n || length xs < 1 = [Nothing] 
-	| otherwise = (takeNth n xs) : takeEveryNthMaybe n (drop n xs)
+	| otherwise = (takeNthMaybe n xs) : takeEveryNthMaybe n (drop n xs)
 
 takeEveryNth :: Int -> [a] -> [a]
 takeEveryNth n xs = map fromJust (filter isJust (takeEveryNthMaybe n xs))
 
 skips :: [a] -> [[a]]
-skips xs = [takeEveryNth n xs | n<-[1..length xs]]
+skips xs = [ takeEveryNth n xs | n <- [1..length xs] ]
