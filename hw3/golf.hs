@@ -81,8 +81,29 @@ count :: Int -> [Int] -> Int
 count n xs = length (filter (\x -> x == n) xs)
 
 countAll :: [Int] -> [Int]
-countAll xs = [count n xs | n <- [1..9] ]
+countAll xs = [count n xs | n <- [0..9] ]
 
--- now go through and see which counts ==1, ==2, etc up to the length of the original list
+hit :: Int -> Int -> Char
+hit n m
+	| n <= m = '*'
+	| otherwise = ' '
+
+hits :: Int -> [Int] -> String
+hits n xs = map (hit n) xs
+
+levels :: [Int] -> [String]
+levels xs = [ hits n (countAll xs) | n <- [1..length xs] ]
+
+format :: String -> String
+format s = s ++ "\n"
+
+formattedLevels :: [Int] -> String
+formattedLevels = concat . reverse . (map format) . levels
+
+s = "==========\n0123456789\n"
+
+histogram :: [Int] -> IO()
+histogram xs = putStr (formattedLevels xs ++ s)
+
 
 
