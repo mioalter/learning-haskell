@@ -11,13 +11,13 @@ fun1 =  foldl' (*) 1 . map (+ (-2)) . filter even
 --(b)
 evener :: Integer -> Integer
 evener n
+	| n <= 1 = 0
 	| even n = n
 	| otherwise = 3*n+1
 
 steps :: Integer -> Integer
-steps = (`div` 2) . evener
+steps =  evener . (`div` 2)
 
-allValues :: Integer -> [Integer]
-allValues = takeWhile (>1) . iterate steps
+fun2 :: Integer -> Integer
+fun2 = foldl' (+) 0 . takeWhile (>1) . iterate steps . evener
 
---fun2 :: Integer -> Integer
