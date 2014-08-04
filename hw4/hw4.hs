@@ -18,6 +18,8 @@ evener n
 steps :: Integer -> Integer
 steps =  evener . (`div` 2)
 
-fun2 :: Integer -> Integer
-fun2 = foldl' (+) 0 . takeWhile (>1) . iterate steps . evener
+allValues :: Integer -> [Integer]
+allValues = takeWhile (>1) . iterate steps . evener
 
+fun2 :: Integer -> Integer
+fun2 = foldl' (+) 0 . allValues
