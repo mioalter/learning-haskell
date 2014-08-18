@@ -42,6 +42,7 @@ getHeight :: Tree a -> Integer
 getHeight Leaf = 0
 getHeight (Node h (lTree) n (rTree)) = h
 
+--can probably rewrite this more succinctly (and to explicitly use fold)
 foldTree :: [a] -> Tree a
 foldTree [] = Leaf
 foldTree [x] = Node 0 Leaf x Leaf
@@ -53,6 +54,7 @@ foldTree zs = Node h lTree (head y) rTree
 					lTree = foldTree xs
 					rTree = foldTree ys
 					h = 1 + max (getHeight lTree) (getHeight rTree)
+
 
 
 --Exercise 3: More folds!
