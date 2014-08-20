@@ -48,12 +48,12 @@ foldTree [] = Leaf
 foldTree [x] = Node 0 Leaf x Leaf
 foldTree [x, y] = Node 1 (Node 0 Leaf x Leaf) y Leaf
 foldTree [x, y, z] = Node 1 (Node 0 Leaf x Leaf) y (Node 0 Leaf z Leaf)
-foldTree zs = Node h lTree (head y) rTree
+foldTree zs = Node height lTree (head y) rTree
 				where 
 					[xs, y, ys] = split . divide $ zs
 					lTree = foldTree xs
 					rTree = foldTree ys
-					h = 1 + max (getHeight lTree) (getHeight rTree)
+					height = 1 + max (getHeight lTree) (getHeight rTree)
 
 
 
@@ -74,5 +74,31 @@ xor =  int2bool . foldl (+) 0 . map bool2int
 --(b)
 map' :: (a -> b) -> [a] -> [b]
 map' f xs = foldr (\x acc -> f x : acc) [] xs
+
+--check via....lazy evaluation?
+myFoldl :: (a -> b -> b) -> b -> [a] -> b
+myFoldl f z xs = foldr f z . reverse $ xs
+
+--Exercise 4: Finding Primes
+--Implement the Sieve of Sundaram
+--take the numbers 1 to n, remove the numbers of the form i+j+2ij
+--for each remaining number: double it and add one. 
+--These are the odd primes up less than or equal to 2n+2
+toRemove :: Integer -> [Integer]
+toRemove n = [ i + j + 2*i*j | j <- [1..n], i <- [1..j], i + j + 2*i*j <= n]
+
+check :: [Integer] -> Integer -> Bool
+check xs k
+	| k `elem` xs = False
+	| otherwise = True
+
+remove :: Integer -> [Integer]
+remove n = filter (check $ toRemove n) [1..n]
+
+primer :: Integer -> Integer
+primer k = 2*k + 1
+
+sieve :: Integer -> [Integer]
+sieve n = map primer (remove n)
 
 
