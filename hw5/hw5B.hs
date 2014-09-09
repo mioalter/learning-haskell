@@ -1,4 +1,5 @@
 {-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
 import Parser
 import Data.Maybe
 import qualified Data.Map as M
@@ -72,6 +73,7 @@ instance HasVars VarExprT where
 	var = Var
 
 instance HasVars (M.Map String Integer -> Maybe Integer) where
+	var s = 
 
 instance Expr (M.Map String Integer -> Maybe Integer) where
 
