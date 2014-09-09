@@ -1,7 +1,8 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 import Parser
 import Data.Maybe
-import StackVM
+import qualified Data.Map as M
+import Safe
 
 class Expr a where
 	lit :: Integer -> a
@@ -42,7 +43,6 @@ instance Expr Mod7 where
 	mul p q = Mod7 ((mod7 p) * (mod7 q) `mod` 7)
 
 
-
 --for testing
 testExp :: Expr a => Maybe a
 testExp = parseExp lit add mul "(3 * -4) + 5"
@@ -53,5 +53,27 @@ testMM       = testExp :: Maybe MinMax
 testSat      = testExp :: Maybe Mod7
 
 
---Exercise 5
+--Exercise 6
+class HasVars a where
+	var :: String -> a
+
+data VarExprT = Lit Integer
+           | Add VarExprT VarExprT
+           | Mul VarExprT VarExprT
+           | Var String
+  deriving (Show, Eq)
+
+instance Expr VarExprT where
+	lit = Lit
+	add = Add
+	mul = Mul
+
+instance HasVars VarExprT where
+	var = Var
+
+instance HasVars (M.Map String Integer -> Maybe Integer) where
+
+instance Expr (M.Map String Integer -> Maybe Integer) where
+
+
 
