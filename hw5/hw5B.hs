@@ -4,12 +4,12 @@ import Parser
 import Data.Maybe
 import qualified Data.Map as M
 import Safe
+import Control.Applicative
 
 class Expr a where
 	lit :: Integer -> a
 	add :: a -> a -> a
 	mul:: a -> a -> a
-
 
 --Exercise 4
 newtype MinMax = MinMax Integer deriving (Eq, Show)
@@ -73,9 +73,26 @@ instance HasVars VarExprT where
 	var = Var
 
 instance HasVars (M.Map String Integer -> Maybe Integer) where
-	var s = 
+	var s = M.lookup s
+
+consM :: Integer -> M.Map String Integer -> Maybe Integer
+consM n m = Just n
+
+addM :: (M.Map String Integer -> Maybe Integer) -> (M.Map String Integer -> Maybe Integer) -> (M.Map String Integer -> Maybe Integer)
+addM f g m = pure (+) <*> f(m) <*> g(m)
+
+mulM :: (M.Map String Integer -> Maybe Integer) -> (M.Map String Integer -> Maybe Integer) -> (M.Map String Integer -> Maybe Integer)
+mulM f g m = pure (*) <*> f(m) <*> g(m)
 
 instance Expr (M.Map String Integer -> Maybe Integer) where
+	lit n = consM n
+	add x y = addM x y
+	mul x y = mulM x y 
+
+
+withVars :: [(String, Integer)] -> (M.Map String Integer -> Maybe Integer) -> Maybe Integer
+withVars vs exp = exp $ M.fromList vs
+
 
 
 
