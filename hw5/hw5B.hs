@@ -79,10 +79,10 @@ consM :: Integer -> M.Map String Integer -> Maybe Integer
 consM n m = Just n
 
 addM :: (M.Map String Integer -> Maybe Integer) -> (M.Map String Integer -> Maybe Integer) -> (M.Map String Integer -> Maybe Integer)
-addM f g m = pure (+) <*> f(m) <*> g(m)
+addM f g m = pure (+) <*> f m <*> g m
 
 mulM :: (M.Map String Integer -> Maybe Integer) -> (M.Map String Integer -> Maybe Integer) -> (M.Map String Integer -> Maybe Integer)
-mulM f g m = pure (*) <*> f(m) <*> g(m)
+mulM f g m = pure (*) <*> f m <*> g m
 
 instance Expr (M.Map String Integer -> Maybe Integer) where
 	lit n = consM n
