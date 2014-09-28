@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -fno-warn-missing-methods #-}
+{-# LANGUAGE FlexibleInstances #-}
 import Data.Array
 
 --Exercise 1
@@ -32,7 +34,7 @@ fibs1 = map fib [0..]
 
 fibs2 :: [Integer]
 fibs2 = t where
-	t = [1,1] ++ [t!!(i-2) + t!!(i-1) | i <- [2..]]
+	t = [0, 1] ++ [t!!(i-2) + t!!(i-1) | i <- [2..]]
 
 --Exercise 3
 
@@ -74,3 +76,61 @@ ruler :: Stream Integer
 ruler = streamMap log2 nonNegs
 
 --Exercise 6
+
+x :: Stream Integer
+x = Cons 0 $ Cons 1 $ streamRepeat 0
+
+one :: Stream Integer
+one = Cons 1 $ streamRepeat 0
+
+scale :: Integer -> Stream Integer -> Stream Integer
+scale n (Cons a b) = Cons (n * a) (scale n b)
+
+--scales by the reciprocal of an integer, only produces a stream of integers
+--if all the coefficients actually are divisible by the integer
+scaleRecip :: Integer -> Stream Integer -> Stream Integer
+scaleRecip b (Cons a a') = Cons (a `div` b) (scaleRecip b a')
+
+instance Num (Stream Integer) where
+	fromInteger n = Cons n $ streamRepeat 0
+	negate (Cons a b) = Cons ((-1) * a) (negate b)
+	(+) (Cons a b) (Cons c d) = Cons (a + c) (b + d)
+	(*) (Cons a a') (Cons b b') = Cons (a * b) ((scale a b') + (a' * (Cons b b')))
+
+instance Fractional (Stream Integer) where
+	(/) (Cons a a') (Cons b b') = q where
+								q = Cons (a `div` b) (scaleRecip b (a' + negate(q * b'))) 
+
+streamFromList :: [a] -> Stream a
+streamFromList (x:xs) = Cons x (streamFromList xs)
+
+-- the Fibonacci numbers as a generating function
+fibsGF :: Stream Integer
+fibsGF = streamFromList fibs2
+
+-- defining the Fibonacci numbers as a generating function F(x) and observing that
+-- x = F(x) - xF(x) - x^2 F(x) and solving, we find that
+-- F(x) = x / (1 - x - x^2)
+-- we may thus directly define F(x) as this ratio of generating functions
+fibs3 :: Stream Integer
+fibs3 = x / (1 - x - x^2)
+
+--Exercise 7
+--An O(log n) way to find the nth Fibonacci number
+data Matrix a = Square a a a a
+
+instance Show a => Show (Matrix a) where
+	show (Square a b c d) = show [a,b,c,d]
+
+instance Num (Matrix Integer) where
+	(*) (Square a b c d) (Square a' b' c' d') = Square (a * a' + b * c') (a * b' + b * d') (a' * c + c' * d) (c * b' + d * d')
+	(+) (Square a b c d) (Square a' b' c' d') = Square (a + a') (b + b') (c + c') (d + d')
+	negate (Square a b c d) = Square ((-1) * a) ((-1) * b) ((-1) * c) ((-1) * d)
+
+proj2 :: Matrix Integer -> Integer
+proj2 (Square a b c d) = b
+
+fibs4 :: Integer -> Integer
+fibs4 0 = 0
+fibs4 n = proj2 $ (Square 1 1 1 0) ^ n
+
