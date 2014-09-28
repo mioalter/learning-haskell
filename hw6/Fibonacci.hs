@@ -128,7 +128,7 @@ instance Num (Matrix Integer) where
 	negate (Square a b c d) = Square ((-1) * a) ((-1) * b) ((-1) * c) ((-1) * d)
 
 proj2 :: Matrix Integer -> Integer
-proj2 (Square a b c d) = b
+proj2 (Square _ b _ _) = b
 
 fibs4 :: Integer -> Integer
 fibs4 0 = 0
