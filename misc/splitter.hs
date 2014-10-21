@@ -1,4 +1,7 @@
 
+-- write a function to take a list of 0s and 1s and return two lists containing the indices of the 0s
+-- and the indices of the 1s. This is a first step in balancing a data set.
+
 -- write as a fold
 -- will need accumulator to keep track of index in the list.
 
