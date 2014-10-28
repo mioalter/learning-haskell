@@ -1,5 +1,8 @@
+{-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
 import Data.Monoid
 import Sized
+import Scrabble
+import Buffer
 -- Unrelated exercise: writer splitter function for balancing a dataset in haskell.
 -- see splitter.hs
 
@@ -68,4 +71,17 @@ jlToList :: JoinList m a -> [a]
 jlToList Empty            = []
 jlToList (Single _ a)     = [a]
 jlToList (Append _ l1 l2) = jlToList l1 ++ jlToList l2
+
+-- | Exercise 3
+scoreLine :: String -> JoinList Score String
+scoreLine x = Single (scoreString x) x
+ 
+-- | Exercise 4
+instance Buffer (JoinList (Score, Size) String) where
+	toString = unwords . jlToList
+	fromString x = Single (scoreString x, Size 1) x
+	line = indexJ
+	replaceLine n x b = takeJ (n-1) b +++ fromString x +++ dropJ (n+1) b
+	numLines = getSize . size . tag
+	value = getScore . fst . tag
 
