@@ -3,6 +3,8 @@ import Data.Monoid
 import Sized
 import Scrabble
 import Buffer
+import Editor
+
 -- Unrelated exercise: writer splitter function for balancing a dataset in haskell.
 -- see splitter.hs
 
@@ -43,6 +45,7 @@ dropJ _ Empty = Empty
 dropJ n t 
 		| n > (getSize . size . tag $ t) = Empty
 		| n < 1 = t
+dropJ n (Single x y) = Empty
 dropJ n (Append _ l r)
 		| n > (getSize . size . tag $ l) = dropJ (n - num_left) r
 		| otherwise = (+++) (dropJ n l) r
@@ -53,6 +56,9 @@ takeJ _ Empty = Empty
 takeJ n t
 		| n > (getSize . size . tag $ t) = t
 		| n < 1 = Empty
+takeJ n (Single x y)
+		| n == 1 = Single x y
+		| otherwise = Empty
 takeJ n (Append _ l r)
 		| n < (getSize . size . tag $ l) = takeJ n l
 		| otherwise = (+++) l (takeJ (n - num_left) r)
@@ -84,4 +90,18 @@ instance Buffer (JoinList (Score, Size) String) where
 	replaceLine n x b = takeJ (n-1) b +++ fromString x +++ dropJ (n+1) b
 	numLines = getSize . size . tag
 	value = getScore . fst . tag
+
+-- Looks like there's an error in the indexJ function so the 'line' function
+-- is wonky, the other functions in the above instance work fine.
+initialBuffer :: JoinList (Score, Size) String
+initialBuffer = foldr (+++) Empty (map fromString 
+         [ "This buffer is for notes you don't want to save, and for"
+         , "evaluation of steam valve coefficients."
+         , "To load a different file, type the character L followed"
+         , "by the name of the file."
+         ])
+
+
+
+main = runEditor editor $ initialBuffer
 
