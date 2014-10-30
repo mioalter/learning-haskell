@@ -96,8 +96,6 @@ instance Buffer (JoinList (Score, Size) String) where
 	numLines = jlSizedToInt
 	value = getScore . fst . tag
 
--- Looks like there's an error in the indexJ function so the 'line' function
--- is wonky, the other functions in the above instance work fine.
 initialBuffer :: JoinList (Score, Size) String
 initialBuffer = foldr (+++) Empty (map fromString 
          [ "This buffer is for notes you don't want to save, and for"
