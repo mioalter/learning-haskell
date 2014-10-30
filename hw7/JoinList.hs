@@ -78,6 +78,11 @@ jlToList Empty            = []
 jlToList (Single _ a)     = [a]
 jlToList (Append _ l1 l2) = jlToList l1 ++ jlToList l2
 
+-- To test: verify that for a JoinList jl,
+-- (indexJ i jl) == (jlToList jl !!? i)
+-- jlToList (dropJ n jl) == drop n (jlToList jl)
+-- jlToList (takeJ n jl) == take n (jlToList jl)
+
 -- | Exercise 3
 scoreLine :: String -> JoinList Score String
 scoreLine x = Single (scoreString x) x
