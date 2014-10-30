@@ -26,43 +26,43 @@ tag (Append x _ _) = x
 -- | Exercise 2
 
 -- use this helper function in indexJ, dropJ and takeJ!
-annToInt :: (Sized b, Monoid b) => JoinList b a -> Int
-annToInt = getSize . size . tag
+jlSizedToInt :: (Sized b, Monoid b) => JoinList b a -> Int
+jlSizedToInt = getSize . size . tag
 
 indexJ :: (Sized b, Monoid b) => Int -> JoinList b a -> Maybe a
-indexJ n Empty = Nothing
+indexJ n t | n < 1 || n > (jlSizedToInt $ t) = Nothing
+indexJ _ Empty = Nothing
 indexJ n (Single x y) 
-				| n == 0 = Just y
+				| n == 1 = Just y
 				| otherwise = Nothing
 indexJ n (Append x l r)
-				| n > (getSize . size $ x) = Nothing
-				| n > (getSize . size . tag $ l) = indexJ (n - num_left) r
+				| n > num_left = indexJ (n - num_left) r
 				| otherwise = indexJ n l
-					where num_left = getSize . size . tag $ l 
+					where num_left = jlSizedToInt l 
 
 dropJ :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
 dropJ _ Empty = Empty
 dropJ n t 
-		| n > (getSize . size . tag $ t) = Empty
+		| n > (jlSizedToInt t) = Empty
 		| n < 1 = t
 dropJ n (Single x y) = Empty
 dropJ n (Append _ l r)
-		| n > (getSize . size . tag $ l) = dropJ (n - num_left) r
+		| n > num_left = dropJ (n - num_left) r
 		| otherwise = (+++) (dropJ n l) r
-			where num_left = getSize . size . tag $ l 
+			where num_left = jlSizedToInt l 
 
 takeJ :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
 takeJ _ Empty = Empty
 takeJ n t
-		| n > (getSize . size . tag $ t) = t
+		| n > (jlSizedToInt t) = t
 		| n < 1 = Empty
 takeJ n (Single x y)
 		| n == 1 = Single x y
 		| otherwise = Empty
 takeJ n (Append _ l r)
-		| n < (getSize . size . tag $ l) = takeJ n l
+		| n < num_left = takeJ n l
 		| otherwise = (+++) l (takeJ (n - num_left) r)
-			where num_left = getSize . size . tag $ l
+			where num_left = jlSizedToInt l
 
 -- Testing
 
@@ -100,8 +100,6 @@ initialBuffer = foldr (+++) Empty (map fromString
          , "To load a different file, type the character L followed"
          , "by the name of the file."
          ])
-
-
 
 main = runEditor editor $ initialBuffer
 
