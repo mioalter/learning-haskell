@@ -30,13 +30,13 @@ jlSizedToInt :: (Sized b, Monoid b) => JoinList b a -> Int
 jlSizedToInt = getSize . size . tag
 
 indexJ :: (Sized b, Monoid b) => Int -> JoinList b a -> Maybe a
-indexJ n t | n < 1 || n > (jlSizedToInt $ t) = Nothing
+indexJ n t | n < 0 || n > (jlSizedToInt t) = Nothing
 indexJ _ Empty = Nothing
-indexJ n (Single x y) 
-				| n == 1 = Just y
+indexJ n (Single x y)
+				| n == 0 = Just y
 				| otherwise = Nothing
 indexJ n (Append x l r)
-				| n > num_left = indexJ (n - num_left) r
+				| n >= num_left = indexJ (n - num_left) r
 				| otherwise = indexJ n l
 					where num_left = jlSizedToInt l 
 
@@ -87,8 +87,8 @@ instance Buffer (JoinList (Score, Size) String) where
 	toString = unwords . jlToList
 	fromString x = Single (scoreString x, Size 1) x
 	line = indexJ
-	replaceLine n x b = takeJ (n-1) b +++ fromString x +++ dropJ (n+1) b
-	numLines = getSize . size . tag
+	replaceLine n x b = takeJ n b +++ fromString x +++ dropJ (n + 1) b
+	numLines = jlSizedToInt
 	value = getScore . fst . tag
 
 -- Looks like there's an error in the indexJ function so the 'line' function
