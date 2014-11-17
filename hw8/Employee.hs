@@ -1,6 +1,6 @@
 module Employee where
 
-import           Data.Tree
+import Data.Tree
 
 -- Employee names are represented by Strings.
 type Name = String
@@ -50,3 +50,4 @@ data GuestList = GL {emps :: [Employee], totFun :: Fun}
 
 instance Ord GuestList where
   compare (GL _ f1) (GL _ f2) = compare f1 f2
+
