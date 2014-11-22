@@ -2,6 +2,7 @@
 import Data.Monoid
 import Employee
 import Data.Tree
+import Data.List
 
 --module Party where
 
@@ -26,7 +27,27 @@ treeFold z f t = f (rootLabel t) (map (treeFold z f) (subForest t))
 bestGL :: [GuestList] -> GuestList
 bestGL = foldr (\gs bs -> if totFun gs > totFun bs then gs else bs) (GL [] 0)
 
+--combine :: Monoid m => (m, m) -> m
+--combine (a, b) = a
+
 nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
-nextLevel e gs = (bestGL $ map glCons e $ withBoss, bestGL withoutBoss)
-	where withBoss = map fst gs
-			withoutBoss = map snd gs
+nextLevel e gs = (bestGL $ map (glCons e) allgs, bestGL allgs)
+	where allgs = map fst gs ++ map snd gs
+
+maxFun :: Tree Employee -> GuestList
+maxFun t = moreFun (fst bestTwo) (snd bestTwo)
+	where bestTwo = treeFold (GL [] 0, GL [] 0) nextLevel t 
+
+-- | Exercise 5
+
+showBest :: GuestList -> (String, [String])
+showBest gl = (show $ totFun gl, map (show . empName) $ emps gl)
+
+main = do
+	companyString <- readFile "company.txt"
+	let companyTree = read companyString
+	let bestList = showBest $ maxFun companyTree
+	putStrLn $ "Total Fun: " ++ (fst bestList)
+	sequence $ map putStrLn $ sort $ snd bestList
+
+
