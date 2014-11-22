@@ -34,7 +34,6 @@ tupToList (x, y) = [x, y]
 listPairs2List :: [(a,a)] -> [a]
 listPairs2List = foldr (\pair acc -> (tupToList pair) ++ acc) []
 
-
 nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
 nextLevel e gs = (bestGL $ map (glCons e) allgs, bestGL allgs)
 	where allgs = listPairs2List gs
