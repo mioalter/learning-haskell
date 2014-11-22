@@ -27,8 +27,8 @@ treeFold z f t = f (rootLabel t) (map (treeFold z f) (subForest t))
 bestGL :: [GuestList] -> GuestList
 bestGL = foldr (\gs bs -> if totFun gs > totFun bs then gs else bs) (GL [] 0)
 
---combine :: Monoid m => (m, m) -> m
---combine (a, b) = a
+--tupToList :: (a,a) -> [a,a]
+--tupToList (x, y) = [x, y]
 
 nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
 nextLevel e gs = (bestGL $ map (glCons e) allgs, bestGL allgs)
