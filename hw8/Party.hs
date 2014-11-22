@@ -27,12 +27,17 @@ treeFold z f t = f (rootLabel t) (map (treeFold z f) (subForest t))
 bestGL :: [GuestList] -> GuestList
 bestGL = foldr (\gs bs -> if totFun gs > totFun bs then gs else bs) (GL [] 0)
 
---tupToList :: (a,a) -> [a,a]
---tupToList (x, y) = [x, y]
+-- two helper functions so that we scan the list of pairs of gls only once in nextLevel
+tupToList :: (a, a) -> [a]
+tupToList (x, y) = [x, y]
+
+listPairs2List :: [(a,a)] -> [a]
+listPairs2List = foldr (\pair acc -> (tupToList pair) ++ acc) []
+
 
 nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
 nextLevel e gs = (bestGL $ map (glCons e) allgs, bestGL allgs)
-	where allgs = map fst gs ++ map snd gs
+	where allgs = listPairs2List gs
 
 maxFun :: Tree Employee -> GuestList
 maxFun t = moreFun (fst bestTwo) (snd bestTwo)
