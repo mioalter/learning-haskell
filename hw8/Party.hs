@@ -10,10 +10,16 @@ import Data.List
 glCons :: Employee -> GuestList -> GuestList
 glCons e gl = GL (e:emps gl) (empFun e + totFun gl)
 
+-- mconcat using folr $ map is inefficient: it traverse the list of gls twice, once to map and once to fold
+-- can rewrite both emps and totFun to use a single fold and traverse the list once
+-- note: emps is still not efficient because to add two lists, ++ steps through the whole
+-- first list. This is where you use the Cayley representation.
+-- Separate exercise, to be continued elsewhere: rewrite to use the Cayley representation
+-- to define mconcat more efficiently.
 instance Monoid GuestList where
   mempty = GL [] 0
   mappend a b = GL (emps a ++ emps b) (totFun a + totFun b)
-  mconcat gls = GL { emps = concat $ map emps gls, totFun = foldr (+) 0 $ map totFun gls}
+  mconcat gls = GL {emps = foldr (\gl b -> (emps gl) ++ b) [] gls , totFun = foldr (\gl b -> (totFun gl) + b) 0 gls}
 
 moreFun :: GuestList -> GuestList -> GuestList
 moreFun gla glb
