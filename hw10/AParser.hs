@@ -7,6 +7,7 @@ module AParser where
 import           Control.Applicative
 
 import           Data.Char
+import Data.Maybe
 
 -- A parser for a value of type a is a function which takes a String
 -- represnting the input to be parsed, and succeeds or fails; if it
@@ -61,20 +62,36 @@ posInt = Parser f
 fStar :: (a -> c) -> (b -> d) -> (a, b) -> (c, d)
 fStar f g (x, y) = (f x, g y)
 
-first :: (a -> b) -> (a,c) -> (b,c)
-first f (x, y) = (f x, y)
-
 -- | Exercise 1: implement a functor instance for Parser
 instance Functor Parser where
   fmap f (Parser {runParser = g}) = Parser {runParser = fmap (fStar f id) . g}
-  -- or equivalently
-  --fmap f (Parser {runParser = g}) = Parser {runParser = fmap (first f) . g}
 
+-- or equivalently,
+--first :: (a -> b) -> (a,c) -> (b,c)
+--first f (x, y) = (f x, y)
+
+--instance Functor Parser where
+--fmap f (Parser {runParser = g}) = Parser {runParser = fmap (first f) . g}
+
+-- Now, 
+-- Parser if a functor
+-- on objects: a |-> Parser a = (String -> Maybe (a, String))
+-- on maps: (a -> b) -> Parser a -> Parser b
+-- to define it as an instance of applicative, need
+-- <*> :: f (a -> b) -> f a -> f b
+-- where f is Parser
+-- Q: how do we even pattern match on a thing of type (Parser (a -> b)) ? Apparenlty (Parser f) is not it.
+
+
+-- something doesn't quite work, but this is the right idea
 instance Applicative Parser where
   pure x = Parser {runParser = \ _ -> Just (x, "")} 
-  (<*>) pA pB = Parser {runParser = f (runParser pA)}
-    where f 
-        | Just x = (runParser pB) . (fmap snd) $ x
-        | otherwise = Nothing 
-
+  pF <*> pA = Parser {runParser g}
+    where 
+      g s
+        | yo == Nothing = Nothing
+        | otherwise = fmap (fStar function id) value
+        where yo = runParser pF s
+              function = fst . fromJust $ yo -- :: a -> b
+              value = (runParser pA) . snd . fromJust $ yo -- :: Maybe (a, String)
 
