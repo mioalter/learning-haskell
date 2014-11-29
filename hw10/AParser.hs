@@ -73,25 +73,42 @@ instance Functor Parser where
 --instance Functor Parser where
 --fmap f (Parser {runParser = g}) = Parser {runParser = fmap (first f) . g}
 
--- Now, 
--- Parser if a functor
--- on objects: a |-> Parser a = (String -> Maybe (a, String))
--- on maps: (a -> b) -> Parser a -> Parser b
--- to define it as an instance of applicative, need
--- <*> :: f (a -> b) -> f a -> f b
--- where f is Parser
--- Q: how do we even pattern match on a thing of type (Parser (a -> b)) ? Apparenlty (Parser f) is not it.
 
+-- | Exercise 2
+colim :: Maybe a -> Maybe b -> Maybe (a, b)
+colim _ Nothing = Nothing
+colim Nothing _ = Nothing
+colim (Just x) (Just y) = Just (x, y)
 
--- something doesn't quite work, but this is the right idea
 instance Applicative Parser where
-  pure x = Parser {runParser = \ _ -> Just (x, "")} 
-  pF <*> pA = Parser {runParser g}
+  pure x = Parser {runParser = \ s -> Just (x, s)} 
+  pF <*> pA = Parser h
     where 
-      g s
-        | yo == Nothing = Nothing
-        | otherwise = fmap (fStar function id) value
-        where yo = runParser pF s
-              function = fst . fromJust $ yo -- :: a -> b
-              value = (runParser pA) . snd . fromJust $ yo -- :: Maybe (a, String)
+      h s =
+        let yo = runParser pF s -- :: Maybe (a -> b, String)
+            fcn = fmap fst yo -- :: Maybe (a -> b)
+            preValue = fmap snd yo -- :: Maybe String
+            midValue = preValue >>= (runParser pA) -- :: Maybe (a, String)
+            -- using that Maybe is a Monad
+            -- now the (Maybe a) part is the value to which we want to apply fcn
+            -- and the (Maybe String) part is the rest of the input string
+            -- that comes along for the ride
+            value = fmap fst midValue -- :: Maybe a
+            rest = fmap snd midValue -- :: Maybe String
+            outValue = fcn <*> value -- :: Maybe b
+            -- using that Maybe is an Applicative
+        in colim outValue rest
 
+-- | Exercise 3
+
+fun2 :: Char -> Char -> (Char, Char)
+fun2 x y = (x, y)
+
+fun3 :: Char -> Char -> Char -> (Char, Char, Char)
+fun3 x y z = (x, y, z)
+
+abParser :: Parser (Char, Char)
+abParser = (pure fun2) <*> (char 'a') <*> (char 'b')
+
+abcParser :: Parser (Char, Char, Char)
+abcParser = (pure fun3) <*> (char 'a') <*> (char 'b') <*> (char 'c')
