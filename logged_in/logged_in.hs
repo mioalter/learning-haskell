@@ -2,9 +2,10 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 {- A user might be logged in at different times on multiple devices and these sessions might even overlap in various ways.
-Given a standardized list of sessions (a list of ordered, disjoint time intervals), write a function that takes a new session and updates the list.
-That is, it manages the fact that the new session may contain, be contained in, overlap, or all of the above, existing sessions and updates the list
-to produce a new standardized list of sessions (interverals which are again ordered and disjoint). -}
+Given a standardized list of sessions (a list of ordered, disjoint time intervals), 
+write a function that takes a new session and updates the list.
+That is, it manages the fact that the new session may contain, be contained in, overlap, or all of the above, 
+existing sessions and produces a new standardized list of sessions (a list of intervals which are again ordered and disjoint). -}
 
 {- To Do
 * optimize functions where indicated
