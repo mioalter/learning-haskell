@@ -51,6 +51,7 @@ class Containable a where
 	contains :: a -> a -> Bool
 	isContained :: a -> a -> Bool
 
+-- optimization: where a = (a_0,a_1) and b = (b_0, b_1)
 instance Containable Interval where
 	l a b = snd a < fst b
 	leq a b = and [fst a <= fst b, snd a >= fst b, snd a <= snd b]
@@ -58,6 +59,7 @@ instance Containable Interval where
 	g a b = fst a > snd b
 	contains a b = and [fst a <= fst b, snd a >= snd b]
 	isContained a b = contains b a
+
 
 compareInterval :: Interval -> Interval -> Compare
 compareInterval a b
@@ -86,12 +88,15 @@ compareInterval a b
 
 c = [(1,4), (8,12), (15, 20), (24, 30), (33,38), (41, 47)]
 
+-- optimization: do this with one pass over the list, not three
 triage :: [(Interval, Compare)] -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)])
 triage xs = (filter (\x -> snd x == G) xs, filter (\x -> snd x /= G && snd x /= L) xs, filter (\x -> snd x == L) xs)
 
+-- optimization: doing map and then zip makes two passes; do this with a single fold
 partition :: Interval -> [Interval] -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)])
 partition x ys = triage $ zip ys (map (compareInterval x) ys)
 
+-- optimization: can we consolidate some of these patterns?
 absorb :: Interval -> [(Interval, Compare)] -> [Interval]
 absorb x [(y, LEQ)] = [(fst x, snd y)]
 absorb x [(y, GEQ)] = [(fst y, snd x)]
@@ -108,6 +113,8 @@ absorb x ((y, GEQ):ys)
 absorb x [] = [x]
 absorb x ys = []
 
+-- is there a more elegant way to write this?
+-- how do you take a tuple of functions (f, g, h) and apply them componentwise to a tuple of values (a, b, c)?
 update :: Interval -> [Interval] -> [Interval]
 update x ys = (map fst a) ++ (absorb x b) ++ (map fst c)
 	where (a, b, c) = partition x ys
