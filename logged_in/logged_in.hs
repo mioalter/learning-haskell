@@ -63,6 +63,7 @@ partition :: Interval -> [Interval] -> ([(Interval, Compare)], [(Interval, Compa
 partition x ys = triage $ zip ys (map (compareInterval x) ys)
 
 -- optimization: can we consolidate some of these patterns?
+-- Get the last elementy without reversing the list. That's costly. 
 absorb :: Interval -> [(Interval, Compare)] -> [Interval]
 absorb x [(y, LEQ)] = [(fst x, snd y)]
 absorb x [(y, GEQ)] = [(fst y, snd x)]
@@ -85,11 +86,3 @@ update :: Interval -> [Interval] -> [Interval]
 update x ys = (map fst a) ++ (absorb x b) ++ (map fst c)
 	where (a, b, c) = partition x ys
 
-
-{- 
-
-note: we could make Interval a functor Ord a => Interval a = (a, a)
-we really also should check that the endpoint is >= starting point and use Maybe
-so we'd write a "load new interval" function :: (Int, Int) -> Maybe Interval that returns Nothing if end < start and Just (start, end) otherwise.
-
--}
