@@ -55,6 +55,15 @@ posInt = Parser f
       | otherwise = Just (read ns, rest)
       where (ns, rest) = span isDigit xs
 
+
+posInt' :: Parser Integer
+posInt' = Parser f
+  where
+    f xs
+      | null ns   = Nothing
+      | otherwise = Just (read ns, drop 1 rest)
+      where (ns, rest) = span isDigit xs
+
 ------------------------------------------------------------
 -- Your code goes below here
 ------------------------------------------------------------
@@ -107,8 +116,44 @@ fun2 x y = (x, y)
 fun3 :: Char -> Char -> Char -> (Char, Char, Char)
 fun3 x y z = (x, y, z)
 
+tupFun :: Char -> Char -> ()
+tupFun x y = ()
+
+tupFun' :: Char -> ()
+tupFun' _ = ()
+
+tupFun'' :: Integer -> ()
+tupFun'' _ = ()
+
+intp :: Integer -> Integer -> [Integer]
+intp x y = [x, y]
+
+
+--funUnit :: Char -> Char -> ()
+--funUnit x y = ()
+
+--funPair :: [Char] -> [Integer]
+--funPair = map words
+
 abParser :: Parser (Char, Char)
 abParser = (pure fun2) <*> (char 'a') <*> (char 'b')
 
 abcParser :: Parser (Char, Char, Char)
 abcParser = (pure fun3) <*> (char 'a') <*> (char 'b') <*> (char 'c')
+
+abParser_ :: Parser ()
+abParser_ = (pure tupFun) <*> (char 'a') <*> (char 'b')
+
+intPair :: Parser [Integer]
+intPair = (pure intp) <*> posInt' <*> posInt'
+
+-- | Exercise 4
+
+instance Alternative Parser where
+  empty = Parser {runParser = \ s -> Nothing}
+  Parser {runParser = f} <|> Parser {runParser = g} = Parser {runParser = \s -> f s <|> g s}
+
+-- | Exercise 5
+
+intOrUppercase :: Parser ()
+intOrUppercase = ((pure tupFun') <*> (satisfy isUpper)) <|> ((pure tupFun'') <*> posInt)
