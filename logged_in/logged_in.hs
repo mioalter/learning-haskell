@@ -64,7 +64,9 @@ partition :: Interval -> [Interval] -> ([(Interval, Compare)], [(Interval, Compa
 partition x ys = triage $ zip ys (map (compareInterval x) ys)
 
 -- optimization: can we consolidate some of these patterns?
--- Get the last elementy without reversing the list. That's costly. 
+-- Also, get the last element without reversing the list. That's costly.
+-- Do we want to use an array instead of a list? 
+-- Maybe it doesn't matter, but computing the length of a list also requires stepping through it.
 absorb :: Interval -> [(Interval, Compare)] -> [Interval]
 absorb x [(y, LEQ)] = [(fst x, snd y)]
 absorb x [(y, GEQ)] = [(fst y, snd x)]
