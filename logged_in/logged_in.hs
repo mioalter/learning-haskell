@@ -65,6 +65,10 @@ triage xs = foldr (triageFold) ([],[],[]) xs
 partition :: Interval -> [Interval] -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)])
 partition x ys = triage $ map (\y -> (y, compareInterval x y)) ys
 
+-- Note: triage and partition are both folds so we could do these two as a single fold.
+-- the only thing that is happening in partition before triage is applying the function \y -> (y, compareInterval x y)
+-- so we can just incorporate that into the folding function
+
 -- optimization: can we consolidate some of these patterns?
 -- Also, get the last element without reversing the list. That's costly.
 -- Do we want to use an array instead of a list? 
