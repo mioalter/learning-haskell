@@ -1,7 +1,7 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-{- A user might be logged in at different times on multiple devices and these sessions might even overlap in various ways.
+{- A user of, say, Facebook, might be logged in at different times on multiple devices and these sessions might even overlap in various ways.
 Given a standardized list of sessions (a list of ordered, disjoint time intervals), 
 write a function that takes a new session and updates the list.
 That is, it manages the fact that the new session may contain, be contained in, overlap, or all of the above, 
@@ -13,6 +13,9 @@ existing sessions and produces a new standardized list of sessions (a list of in
 loadInterval (a,b) = Just (a,b) if a <= b, Nothing otherwise
 * adapt update function to work with it and use that Maybe is a monad to put them together.
 * Containable should probably have a type constraint: Ord a => Containable a
+That's not quite right: we should define 
+data Ord a => Interval a = (a, a)
+then we can say Ord a => Containable a
 -}
 
 type Interval = (Integer, Integer)
@@ -53,15 +56,32 @@ compareInterval a b
 	| contains a b = Contains
 	| isContained a b = IsContained
 
-c = [(1,4), (8,12), (15, 20), (24, 30), (33,38), (41, 47)]
+a = (16,25)
+b = [(1,4), (8,12), (15, 20), (24, 30), (33,38), (41, 47)]
 
--- optimization: do this with one pass over the list, not three
+-- DONE | optimization: do this with one pass over the list, not three
+--triage :: [(Interval, Compare)] -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)])
+--triage xs = (filter (\x -> snd x == G) xs, filter (\x -> snd x /= G && snd x /= L) xs, filter (\x -> snd x == L) xs)
+
+--helper function to do triage with a single fold
+triageFold :: (Interval, Compare) -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)]) -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)])
+triageFold x (gs, as, ls)
+	| c == G = (gs ++ [x], as, ls)
+	| c == L = (gs, as, ls ++ [x])
+	| otherwise = (gs, as ++ [x], ls)
+	where c = snd x 
+
 triage :: [(Interval, Compare)] -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)])
-triage xs = (filter (\x -> snd x == G) xs, filter (\x -> snd x /= G && snd x /= L) xs, filter (\x -> snd x == L) xs)
+triage xs = foldr (triageFold) ([],[],[]) xs
 
--- optimization: doing map and then zip makes two passes; do this with a single fold
+-- DONE | optimization: doing map and then zip makes two passes; do this with a single fold
+-- all we want to do is map the function \y -> (y, compareInterval x y)
+-- over the list so we don't then have to zip in the ys
+--partition :: Interval -> [Interval] -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)])
+--partition x ys = triage $ zip ys (map (compareInterval x) ys)
+
 partition :: Interval -> [Interval] -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)])
-partition x ys = triage $ zip ys (map (compareInterval x) ys)
+partition x ys = triage $ map (\y -> (y, compareInterval x y)) ys
 
 -- optimization: can we consolidate some of these patterns?
 -- Also, get the last element without reversing the list. That's costly.
