@@ -59,10 +59,6 @@ compareInterval a b
 a = (16,25)
 b = [(1,4), (8,12), (15, 20), (24, 30), (33,38), (41, 47)]
 
--- DONE | optimization: do this with one pass over the list, not three
---triage :: [(Interval, Compare)] -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)])
---triage xs = (filter (\x -> snd x == G) xs, filter (\x -> snd x /= G && snd x /= L) xs, filter (\x -> snd x == L) xs)
-
 --helper function to do triage with a single fold
 triageFold :: (Interval, Compare) -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)]) -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)])
 triageFold x (gs, as, ls)
@@ -73,12 +69,6 @@ triageFold x (gs, as, ls)
 
 triage :: [(Interval, Compare)] -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)])
 triage xs = foldr (triageFold) ([],[],[]) xs
-
--- DONE | optimization: doing map and then zip makes two passes; do this with a single fold
--- all we want to do is map the function \y -> (y, compareInterval x y)
--- over the list so we don't then have to zip in the ys
---partition :: Interval -> [Interval] -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)])
---partition x ys = triage $ zip ys (map (compareInterval x) ys)
 
 partition :: Interval -> [Interval] -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)])
 partition x ys = triage $ map (\y -> (y, compareInterval x y)) ys
