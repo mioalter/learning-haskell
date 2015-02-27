@@ -31,14 +31,6 @@ class Containable a where
 	contains :: a -> a -> Bool
 	isContained :: a -> a -> Bool
 
--- optimization: where a = (a_0,a_1) and b = (b_0, b_1)
--- how to do this: (1) explicitly pattern match (2) let... at the beginning (3) where...at the end?
--- can you use let and where in an instance declaration where you are defining multiple functions?
--- Ask on Haskell-Beginners
--- Q2: is it *not* wasteful to write fst a, snd b every where because once Haskell evaluates
--- fst a, the value is there and it doesn' have to evaluate it again the next time you call it?
--- Not an issue: these are different functions, not different patterns of the same function.
--- Haskell is not repeatedly evaluating anything.
 instance Containable Interval where
 	l (a0,a1) (b0,b1) = a1 < b0
 	leq (a0,a1) (b0,b1) = and [a0 <= b0, a1 >= b0, a1 <= b1]
