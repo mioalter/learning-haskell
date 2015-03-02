@@ -93,6 +93,8 @@ absorb x ys = []
 
 -- is there a more elegant way to write this?
 -- how do you take a tuple of functions (f, g, h) and apply them componentwise to a tuple of values (a, b, c)?
+-- This is the tuple version of zipWith ($) [f,g,h] [a,b,c].
+-- Not so important, can leave like this.
 update :: Interval -> [Interval] -> [Interval]
 update x ys = (map fst a) ++ (absorb x b) ++ (map fst c)
 	where (a, b, c) = triage x ys
