@@ -48,26 +48,28 @@ compareInterval a b
 	| contains a b = Contains
 	| isContained a b = IsContained
 
+-- for testing -- 
+pi2 :: (a,a,a) -> a
+pi2 (x,y,z) = y
+
 a = (16,25)
 b = [(1,4), (8,12), (15, 20), (24, 30), (33,38), (41, 47)]
+c = triage a b
+d = pi2 c
+-- || -- 
 
---helper function to do triage with a single fold
-triageFold :: (Interval, Compare) -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)]) -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)])
-triageFold x (gs, as, ls)
-	| c == G = (gs ++ [x], as, ls)
-	| c == L = (gs, as, ls ++ [x])
-	| otherwise = (gs, as ++ [x], ls)
-	where c = snd x 
+-- NOTE: we are going to foldr so triage will progress from the back of the list of sessions to the front
+-- this means that if we cons on each new pair (y,c) to the appropriate subblist, the smaller intervals will go at the front
+-- this is exactly what we want!
+triageFold :: Interval -> Interval -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)]) -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)])
+triageFold x y (gs, as, ls)
+	| c == G = ((y,c):gs, as, ls)
+	| c == L = (gs, as, (y,c):ls)
+	| otherwise = (gs, (y,c):as, ls)
+	where c = compareInterval x y 
 
-triage :: [(Interval, Compare)] -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)])
-triage xs = foldr (triageFold) ([],[],[]) xs
-
-partition :: Interval -> [Interval] -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)])
-partition x ys = triage $ map (\y -> (y, compareInterval x y)) ys
-
--- Note: triage and partition are both folds so we could do these two as a single fold.
--- the only thing that is happening in partition before triage is applying the function \y -> (y, compareInterval x y)
--- so we can just incorporate that into the folding function
+triage :: Interval -> [Interval] -> ([(Interval, Compare)], [(Interval, Compare)],[(Interval, Compare)])
+triage x ys = foldr (triageFold x) ([],[],[]) ys
 
 -- optimization: can we consolidate some of these patterns?
 -- Also, get the last element without reversing the list. That's costly.
@@ -93,5 +95,5 @@ absorb x ys = []
 -- how do you take a tuple of functions (f, g, h) and apply them componentwise to a tuple of values (a, b, c)?
 update :: Interval -> [Interval] -> [Interval]
 update x ys = (map fst a) ++ (absorb x b) ++ (map fst c)
-	where (a, b, c) = partition x ys
+	where (a, b, c) = triage x ys
 
