@@ -1,10 +1,11 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-{- A user of, say, Facebook, might be logged in at different times on multiple devices and these sessions might even overlap in various ways.
+{- Facebook records all of a user's sessions, the intervals of time for which they are logged in, and likes to know the total time
+for which a user is logged in. A wrinkle is that users log in from multiple devices and sessions can overlap in various ways.
 Given a standardized list of sessions (a list of ordered, disjoint time intervals), 
 write a function that takes a new session and updates the list.
-That is, it manages the fact that the new session may contain, be contained in, overlap, or all of the above, 
+That is, the update function manages the fact that the new session may contain, be contained in, overlap, or all of the above, 
 existing sessions and produces a new standardized list of sessions (a list of intervals which are again ordered and disjoint). -}
 
 {- To Do
@@ -67,11 +68,13 @@ compareInterval a b
 -- for testing -- 
 pi2 :: (a,a,a) -> a
 pi2 (x,y,z) = y
+
 -- Interval Int
 a = (16,25)
 b = [(1,4), (8,12), (15, 20), (24, 30), (33,38), (41, 47)]
 c = triage a b
 d = pi2 c
+
 -- Interval Char
 a' = ('k','m')
 b' = [('a','d'), ('h','l'),('m', 'p'), ('r','z')]
@@ -79,10 +82,11 @@ c' = triage a' b'
 d' = pi2 c'
 -- || -- 
 
-
 -- NOTE: we are going to foldr so triage will progress from the back of the list of sessions to the front
 -- this means that if we cons on each new pair (y,c) to the appropriate subblist, the smaller intervals will go at the front
--- this is exactly what we want!
+-- this is exactly what we want! 
+-- Adding the new element as a singleton list to the end of the sublist, subList ++ [(y,c)], in addition to reversing order,
+-- is also inefficient because it requires stepping all the way through subList.
 triageFold :: Ord a => Interval a -> Interval a -> ([(Interval a, Compare)], [(Interval a, Compare)],[(Interval a, Compare)]) -> ([(Interval a, Compare)], [(Interval a, Compare)],[(Interval a, Compare)])
 triageFold x y (gs, as, ls)
 	| c == G = ((y,c):gs, as, ls)
@@ -92,7 +96,6 @@ triageFold x y (gs, as, ls)
 
 triage :: Ord a => Interval a-> [Interval a] -> ([(Interval a, Compare)], [(Interval a, Compare)],[(Interval a, Compare)])
 triage x ys = foldr (triageFold x) ([],[],[]) ys
-
 
 -- optimization: can we consolidate some of these patterns?
 -- Also, get the last element without reversing the list. That's costly.
@@ -117,7 +120,9 @@ absorb x ys = []
 -- is there a more elegant way to write this?
 -- how do you take a tuple of functions (f, g, h) and apply them componentwise to a tuple of values (a, b, c)?
 -- This is the tuple version of zipWith ($) [f,g,h] [a,b,c].
--- Not so important, can leave like this.
+-- Actually, we should optmize this because the two map calls step through each of those subLists
+-- then adding the lists also requires stepping through the subLists.
+-- this may or may not be worth it.
 update :: Ord a => Interval a -> [Interval a] -> [Interval a]
 update x ys = (map fst a) ++ (absorb x b) ++ (map fst c)
 	where (a, b, c) = triage x ys
