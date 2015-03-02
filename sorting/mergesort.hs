@@ -108,6 +108,7 @@ Solution: let's just define a new data type that is a list which knows its own l
 
 -- | Merge Sort III: LenList, the list that knows its own length
 
+-- (III a) our new data type and some helper functions
 data LenList a = LenList {len :: Int, vals :: [a]}
 	deriving(Eq, Show)
 
@@ -122,7 +123,6 @@ dropL n (LenList l xs) = LenList (l-n) (drop n xs)
 
 reverseL :: LenList a -> LenList a
 reverseL (LenList n xs) = LenList n (reverse xs)
-
 
 instance Monoid (LenList a) where
 	mempty = LenList 0 []
@@ -139,6 +139,8 @@ w = reverseL b
 z = reverseL c
 x = mappend w z
 
+-- (III b) implementation of Merge Sort using LenLists
+
 mergeSorted :: (LenList Int, LenList Int) -> LenList Int
 mergeSorted (LenList 0 [], LenList 0 []) = LenList 0 []
 mergeSorted (LenList n xs, LenList 0 []) = LenList n xs
@@ -152,7 +154,7 @@ splitL lxs = (takeL k lxs, dropL k lxs)
 	where k = fromIntegral $ len lxs `div` 2
 
 -- Now it's extremely obvious what we're doing
--- we split the list, mergeSort each half, then mergeSorted the two (sorted) halves.
+-- we split the list, mergeSort each half, then mergeSorted the two halves.
 mergeSort :: LenList Int -> LenList Int
 mergeSort (LenList 0 []) = LenList 0 []
 mergeSort (LenList 1 [x]) = LenList 1 [x]
