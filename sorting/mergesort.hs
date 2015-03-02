@@ -42,8 +42,10 @@ leaving n-1 total elements to handle.
 We use this recursive relationship to solve for T(n)
 
 T(n) = 2T(n/2) + n
-	 = 2 [2 T(n/4) + n/2] + n 
-	 = 4 T(n/4) + 2n
+	 = 2 [2 T(n/(2^2)) + n/2] + n 
+	 = 2^2 T(n/(2^2)) + 2n
+	 = 2^2 [2 T(n/(2^3)) + n/(2^2)] + 2n 
+	 = 2^3 T(n/(2^3)) + 3n
 	 ...
 	 = 2^(log_2 n) T(1) + n log_2 n
 	 = n + n log n
