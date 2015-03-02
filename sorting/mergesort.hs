@@ -155,17 +155,37 @@ splitL lxs = (takeL k lxs, dropL k lxs)
 -- zipWith ($) [fcns] [vals]
 -- but here we don't want lists of arbitrary length, we want pairs
 applyL :: (a -> b, c -> d) -> (a, c) -> (b, d)
-applyL (f, g) (x,y) = (f x , g y)
+applyL (f, g) (x,y) = (f x, g y)
 
 diagonal :: a -> (a,a)
 diagonal x = (x,x)
 
--- Now it's pretty obvious what we're doing
--- we split the list, mergeSort each half, then mergeSorted the two halves.
+-- Now it's extremely obvious what we're doing
+-- we take a list, split it, mergeSort each half, then mergeSorted the two (sorted) halves.
 mergeSort :: LenList Int -> LenList Int
 mergeSort (LenList 0 []) = LenList 0 []
 mergeSort (LenList 1 [x]) = LenList 1 [x]
-mergeSort lxs = mergeSorted $ applyL (diagonal mergeSort) (splitL lxs)
+mergeSort lxs = mergeSorted . dMerge . splitL $ lxs
+	where dMerge = applyL $ diagonal mergeSort
+
+-- Note this stuff with the applyL and diagonal functions might look fancy, but it's not:
+-- dMerge (left, right) 
+-- is just 
+-- (mergeSort left, mergeSort right)
+-- so 
+-- mergeSorted . dMerge . splitL $ lxs
+-- is just
+-- mergeSorted (mergeSort left, mergeSort right)
+-- where (left,right) = splitL lsx
+
+{-
+Two questions:
+(1) Did it make sense to define LenList like this, or should we have defined it by analogy with Lists
+LenList a = NilL | ConsL a (LenList a)
+Does it matter? 
+(2) Was it actually worth defining a new data structure and having to write LenList everywhere?
+-}
+
 
 
 
