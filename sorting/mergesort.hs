@@ -151,32 +151,13 @@ splitL :: LenList Int -> (LenList Int, LenList Int)
 splitL lxs = (takeL k lxs, dropL k lxs)
 	where k = fromIntegral $ len lxs `div` 2
 
--- there must already be a way to do this....this is the tuple version of 
--- zipWith ($) [fcns] [vals]
--- but here we don't want lists of arbitrary length, we want pairs
-applyL :: (a -> b, c -> d) -> (a, c) -> (b, d)
-applyL (f, g) (x,y) = (f x, g y)
-
-diagonal :: a -> (a,a)
-diagonal x = (x,x)
-
 -- Now it's extremely obvious what we're doing
--- we take a list, split it, mergeSort each half, then mergeSorted the two (sorted) halves.
+-- we split the list, mergeSort each half, then mergeSorted the two (sorted) halves.
 mergeSort :: LenList Int -> LenList Int
 mergeSort (LenList 0 []) = LenList 0 []
 mergeSort (LenList 1 [x]) = LenList 1 [x]
-mergeSort lxs = mergeSorted . dMerge . splitL $ lxs
-	where dMerge = applyL $ diagonal mergeSort
-
--- Note this stuff with the applyL and diagonal functions might look fancy, but it's not:
--- dMerge (left, right) 
--- is just 
--- (mergeSort left, mergeSort right)
--- so 
--- mergeSorted . dMerge . splitL $ lxs
--- is just
--- mergeSorted (mergeSort left, mergeSort right)
--- where (left,right) = splitL lsx
+mergeSort lxs = mergeSorted (mergeSort left, mergeSort right)
+	where (left, right) = splitL lxs
 
 {-
 Two questions:
