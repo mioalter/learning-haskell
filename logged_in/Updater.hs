@@ -1,6 +1,6 @@
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
 
+module Updater where
 {- Facebook records all of a user's sessions, the intervals of time for which they are logged in, and likes to know the total time
 for which a user is logged in. A wrinkle is that users log in from multiple devices and sessions can overlap in various ways.
 Given a standardized list of sessions (a list of ordered, disjoint time intervals), 
@@ -70,8 +70,8 @@ pi2 :: (a,a,a) -> a
 pi2 (x,y,z) = y
 
 -- Interval Int
-a = (16,25)
-b = [(1,4), (8,12), (15, 20), (24, 30), (33,38), (41, 47)]
+a = (16,25) :: Interval Int
+b = [(1,4), (8,12), (15, 20), (24, 30), (33,38), (41, 47)] :: [Interval Int]
 c = triage a b
 d = pi2 c
 
