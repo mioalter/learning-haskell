@@ -1,7 +1,8 @@
-Facebook records all of a user's sessions, the intervals of time for which they are logged in, and likes to know the total time
-for which a user is logged in. A wrinkle is that users log in from multiple devices and sessions can overlap in various ways.
-Given a standardized list of sessions (a list of ordered, disjoint time intervals), 
-write a function that takes a new session and updates the list.
+
+
+Facebook records all of a user's sessions, the intervals of time for which they are logged in, and likes to know the total time for which a user is logged in. 
+A wrinkle is that users log in from multiple devices and sessions can overlap in various ways.
+Given a standardized list of sessions (a list of ordered, disjoint time intervals), write a function that takes a new session and updates the list.
 That is, the update function manages the fact that the new session may contain, be contained in, overlap, or all of the above, 
 existing sessions and produces a new standardized list of sessions (a list of intervals which are again ordered and disjoint).
 
