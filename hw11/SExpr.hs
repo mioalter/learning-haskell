@@ -20,7 +20,7 @@ conser x xs = x:xs
 zeroOrMore :: Parser a -> Parser [a]
 zeroOrMore p = Parser f
 	where 
-		f [] = Nothing
+		f [] = Just([],[])
 		f x 
 			| isJust $ (runParser p) x = (runParser $ oneOrMore p) x
 			| otherwise = Just ([], x)
@@ -34,10 +34,10 @@ oneOrMore p = (pure conser) <*> p <*> zeroOrMore p
 ------------------------------------------------------------
 
 spaces :: Parser String
-spaces = undefined
+spaces = zeroOrMore (satisfy isSpace)
 
 ident :: Parser String
-ident = undefined
+ident = (pure conser) <*> satisfy isAlpha <*> zeroOrMore (satisfy isAlphaNum)
 
 ------------------------------------------------------------
 --  3. Parsing S-expressions
