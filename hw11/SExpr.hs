@@ -66,10 +66,37 @@ identer i = I i
 atomParser :: Parser Atom
 atomParser = ((pure inter) <*> posInt) <|> ((pure identer) <*> ident)
 
---j1 :: Atom -> SExpr
---j1 a = A a
+atomParserPlus :: Parser Atom
+atomParserPlus = spaces *> atomParser <* spaces
 
+atomListParser :: Parser [Atom]
+atomListParser = zeroOrMore $ atomParserPlus
+
+j1 :: Atom -> SExpr
+j1 a = A a
+
+--j1Plus :: Parser Atom -> Parser SExpr
+--j1Plus = fmap j1
+
+j2 :: [SExpr] -> SExpr
+j2 l = Comb l
+
+j3 :: [Atom] -> SExpr
+j3 xs =  j2 $ map j1 xs
+
+sexprParser :: Parser SExpr
+sexprParser = fmap j1 atomParserPlus
 --parseSExpr :: parser SExpr
 
+{-
+Ideas:
+* make sexprListParser :: Parser [SExpr] using zeroOrMore
+* our sexprParser :: Parser SExpr should be 
+((pure j1) <*> atomParserPlus) <|> ((pure j2) <*> sexprListParser)
+* we need to define sexprListParser to work on things that start with '(' end with ')'
+atomParserPlus will fail on those expressions and they will get passed to sexprListParser
+* the recursion will be: sexprList parser is defined in terms of sexprParser and sexprParser is defined in terms of sexprListParser
+* we don't need anything of type Parser [Atom]
+-}
 
 
