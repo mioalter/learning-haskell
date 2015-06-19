@@ -56,3 +56,20 @@ data Atom = N Integer | I Ident
 data SExpr = A Atom
            | Comb [SExpr]
   deriving Show
+
+inter :: Integer -> Atom
+inter i = N i
+
+identer :: Ident -> Atom
+identer i = I i 
+
+atomParser :: Parser Atom
+atomParser = ((pure inter) <*> posInt) <|> ((pure identer) <*> ident)
+
+--j1 :: Atom -> SExpr
+--j1 a = A a
+
+--parseSExpr :: parser SExpr
+
+
+
