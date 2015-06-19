@@ -1,5 +1,5 @@
-I decided for fun to work through the fantastic Introduction to Haskell course, previously 
+I decided for fun to work through the fantastic Introduction to Haskell course
 
-http://www.seas.upenn.edu/~cis194/
+https://www.seas.upenn.edu/~cis194/spring13/lectures.html
 
-taught by Brent Yorgey at UPenn. That site has been updated, but all the course material is in CIS_194.zip in this repo. These are my solutions to the homework assignments and some other tinkerings.
+(also zipped in this repo) taught by Brent Yorgey at UPenn. These are my solutions to the homework assignments and some other tinkerings.
