@@ -69,8 +69,8 @@ atomParser = ((pure inter) <*> posInt) <|> ((pure identer) <*> ident)
 atomParserPlus :: Parser Atom
 atomParserPlus = spaces *> atomParser <* spaces
 
-atomListParser :: Parser [Atom]
-atomListParser = zeroOrMore $ atomParserPlus
+--atomListParser :: Parser [Atom]
+--atomListParser = zeroOrMore $ atomParserPlus
 
 j1 :: Atom -> SExpr
 j1 a = A a
@@ -81,8 +81,8 @@ j1 a = A a
 j2 :: [SExpr] -> SExpr
 j2 l = Comb l
 
-j3 :: [Atom] -> SExpr
-j3 xs =  j2 $ map j1 xs
+--j3 :: [Atom] -> SExpr
+--j3 xs =  j2 $ map j1 xs
 
 
 openParser :: Parser Char
