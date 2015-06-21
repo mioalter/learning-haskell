@@ -84,9 +84,19 @@ j2 l = Comb l
 j3 :: [Atom] -> SExpr
 j3 xs =  j2 $ map j1 xs
 
+
+openParser :: Parser Char
+openParser = char '('
+
+closeParser :: Parser Char
+closeParser = char ')'
+
 sexprParser :: Parser SExpr
-sexprParser = fmap j1 atomParserPlus
---parseSExpr :: parser SExpr
+sexprParser = ((pure j1) <*> atomParserPlus) <|> ((pure j2) <*> sexprListParser)
+
+sexprListParser :: Parser [SExpr]
+sexprListParser = openParser *> spaces *>(zeroOrMore sexprParser) <* spaces <* closeParser
+
 
 {-
 Ideas:
