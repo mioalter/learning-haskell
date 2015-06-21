@@ -95,7 +95,7 @@ sexprParser :: Parser SExpr
 sexprParser = ((pure j1) <*> atomParserPlus) <|> ((pure j2) <*> sexprListParser)
 
 sexprListParser :: Parser [SExpr]
-sexprListParser = openParser *> spaces *>(zeroOrMore sexprParser) <* spaces <* closeParser
+sexprListParser = openParser *> spaces *> (zeroOrMore sexprParser) <* spaces <* closeParser
 
 
 {-
