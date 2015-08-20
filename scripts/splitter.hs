@@ -57,7 +57,7 @@ splitsky = foldl splitHelper ([],[])
 Note: using foldr preserves the order of the lines in the input file
 whereas using foldl reverses them BUT foldr will build up a thunk
 the size of the input file while foldl will process as it goes
-(foldl is tail-recursive) so foldl is actually what you want to use
+(foldl is tail recursive) so foldl is actually what you want to use
 
 (note that the arguments to the folding functions for foldr and foldl
 are reversed: for foldl, the accumulator comes first)
@@ -86,6 +86,4 @@ main = do
 	let (trainName, testName) = (outName f "train", outName f "test") where f = inFile opts
 	writeFile trainName trainUnlines
 	writeFile testName testUnlines
-
-	
 
