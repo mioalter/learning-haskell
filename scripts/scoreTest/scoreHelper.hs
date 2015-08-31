@@ -1,4 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}         
+{-# LANGUAGE DeriveDataTypeable #-}
+
+module Main where
+
+import System.Console.CmdArgs
 import Turtle
 
 {-
@@ -18,26 +23,39 @@ List of steps
 type Model = Text
 type Filename = Text
 
-
--- Should we not have all these functions of type -> IO ()? Would it be better to write pure functions and save the IO part for inside a do block? It is, right? Because that's how we sequence things.
--- No, IO is a monad, we want to sequence functions of type a -> IO b 
--- Okay, so we'll make the pure parts of these their own functions, the better to set parameters (what columns we want)
--- then we can make the IO functions of type Turtle.FilePath -> (Shell Text -> Shell Text) -> IO ()
-
 defaultModel = "GBMModel__9527db7b50c56f078d0528b8b09840a6" :: Model
 defaultFile = "testSH.tsv" :: Filename
 defaultFilePath = "testSH.tsv" :: Turtle.FilePath
 
-toCSV :: Turtle.FilePath -> IO ()
-toCSV f =  output (f <.> "csv") $ inshell "cut -d, -f2-70" $ sed ("\t" *> return ",") $ input f
+--data Options = Options {
+--	inModel :: Model
+--	, inFile :: Filename
+--	, inFilePath :: Turtle.FilePath
+--} deriving (Data, Typeable)
 
-toIdsLabels :: Turtle.FilePath -> IO ()
-toIdsLabels f = output (f <.> "ids_labels") $ inshell "cut -d, -f1,73,77" $ sed ("\t" *> return ",") $ input f
+--options :: Options
+--options = Options {
+--	inModel = "GBMModel__9527db7b50c56f078d0528b8b09840a6"
+--		&= typ "MODEL FOR SCORING"
+--		&= help "Model name (without extension)"
+--	, inFile = "testSH.tsv"
+--		&= typ "INPUT FILE NAME"
+--		&= help "A TSV to score"
+--	, inFilePath = "testSH.tsv"
+--		&= typ "INPUT FILEPATH"
+--		&= help "Same"
+--	}
+--	&= summary "A program to score a TSV with an trained H2O model"
+--	&= program ""
 
-toScores :: Turtle.FilePath -> IO ()
-toScores f = output (f <.> "scores") $ inshell "cut -d, -f3" $ input f
+toCSV :: Shell Text -> Shell Text
+toCSV = inshell "cut -d, -f2-70" . sed ("\t" *> return ",")
 
---zipFiles :: Turtle.FilePath -> Turtle.FilePath
+toIdsLabels :: Shell Text -> Shell Text
+toIdsLabels = inshell "cut -d, -f1,73,77" . sed ("\t" *> return ",")
+
+toScores :: Shell Text -> Shell Text
+toScores = inshell "cut -d, -f3" 
 
 preScoreCommand :: Model -> Text
 preScoreCommand model = mconcat l 
@@ -56,9 +74,29 @@ scoreCommand model input = mconcat l
 		]
 
 main = do
-	toCSV defaultFilePath
-	toIdsLabels defaultFilePath
-	shell (preScoreCommand defaultModel) empty
-	shell (scoreCommand defaultModel (defaultFile <> ".csv")) empty
+	--opts <- cmdArgs options
+	--let fName = inFile opts
+	--let f = inFilePath opts
+	--let model = inModel opts
+	let f = defaultFilePath
+	let fName = defaultFile
+	let model = defaultModel
+	let fCSV = f <.> "csv"
+	let fIDs = f <.> "ids_labels"
+	let fScoreD = f <.> "csv_scored"
+	let fScores = fScoreD <.> "scores"
+	output fCSV $ toCSV $ input f
+	output fIDs $ toIdsLabels $ input f
+	shell (preScoreCommand model) empty
+	shell (scoreCommand model (fName <> ".csv")) empty
+	output fScores $ toScores $ input fScoreD
 
 
+-- Since lines :: String -> [String], I need something equivalent that works on Turtle.Text.
+-- I'm sure there is a function someplace....
+--zipFiles :: Turtle.FilePath -> Turtle.FilePath -> IO ()
+--zipFiles f g = do
+--	fLines <- lines <$> readFile f
+--	gLines <- lines <$> readFile g
+--	writeFile outf $ unlines $ zip fLines gLines
+--		where outf = (fst $ splitExtension f) <.> "scores_and_labels"
