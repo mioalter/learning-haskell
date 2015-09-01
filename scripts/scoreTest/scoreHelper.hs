@@ -17,7 +17,6 @@ List of steps
 -- BETTER: make one file with all dates in it. 
 -}
 
-
 type Model = Text
 type Filename = Text
 
@@ -52,13 +51,6 @@ toCSV :: Text -> Shell Text -> Shell Text
 -- convert TSV to CSV and select a subset of columns
 toCSV t = inshell ("cut -d, -f" <> t) . sed ("\t" *> return ",")
 
---toIdsLabels :: Text -> Shell Text -> Shell Text
---toIdsLabels t = inshell ("cut -d, -f" <> t) . sed ("\t" *> return ",")
-
--- we could just use toCSV "3" instead of defining a new function
---toScores :: Shell Text -> Shell Text
---toScores = inshell "cut -d, -f3" 
-
 preScoreCommand :: Model -> Text
 preScoreCommand model = mconcat l 
 	where l = [
@@ -90,7 +82,6 @@ main = do
 	output fIDs $ toCSV vCols $ input f
 	shell (preScoreCommand model) empty
 	shell (scoreCommand model (fName <> ".csv")) empty
-	--output fScores $ toScores $ input fScoreD
 	output fScores $ toCSV "3" $ input fScoreD
 
 -- Since lines :: String -> [String], I need something equivalent that works on Turtle.Text.
