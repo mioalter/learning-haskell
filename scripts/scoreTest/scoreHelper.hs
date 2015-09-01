@@ -18,24 +18,18 @@ List of steps
 -}
 
 
--- cmdArgs
--- * first, add model, filename, filepath
--- * second, add modeling cols, ids_labels cols
--- TO DO: make a file just to test cmdArgs with new types
-
 type Model = Text
 type Filename = Text
 
---defaultModel = "GBMModel__9527db7b50c56f078d0528b8b09840a6" :: Model
---defaultFile = "testSH.tsv" :: Filename
---defaultFilePath = "testSH.tsv" :: Turtle.FilePath
-
+-- A receptacle for command line arguments (CLAs)
 data Options = Options {
 	inModel :: String
 	, inFile :: String
-	--, inFilePath :: Turtle.FilePath
+	, scoreCols :: String
+	, valCols :: String
 } deriving (Data, Typeable)
 
+-- a set of default values for CLAs
 options :: Options
 options = Options {
 	inModel = "GBMModel__9527db7b50c56f078d0528b8b09840a6"
@@ -44,21 +38,26 @@ options = Options {
 	, inFile = "testSH.tsv"
 		&= typ "INPUT FILENAME"
 		&= help "A TSV to score"
-	--, inFilePath = "testSH.tsv"
-	--	&= typ "INPUT FILEPATH"
-	--	&= help "Same"
+	, scoreCols = "2-70"
+		&= typ "COLUMNS TO SCORE"
+		&= help "input cols to model for scoring"
+	, valCols = "1,73,77"
+		&= typ "VALIDATION COLUMNS"
+		&= help "e.g. id, label, matched, date"
 	}
-	&= summary "A program to score a TSV with an trained H2O model"
-	&= program ""
+	&= summary "A program to score a TSV with a trained H2O model"
+	&= program "POJO Pal v1 (c) Mio"
 
-toCSV :: Shell Text -> Shell Text
-toCSV = inshell "cut -d, -f2-70" . sed ("\t" *> return ",")
+toCSV :: Text -> Shell Text -> Shell Text
+-- convert TSV to CSV and select a subset of columns
+toCSV t = inshell ("cut -d, -f" <> t) . sed ("\t" *> return ",")
 
-toIdsLabels :: Shell Text -> Shell Text
-toIdsLabels = inshell "cut -d, -f1,73,77" . sed ("\t" *> return ",")
+--toIdsLabels :: Text -> Shell Text -> Shell Text
+--toIdsLabels t = inshell ("cut -d, -f" <> t) . sed ("\t" *> return ",")
 
-toScores :: Shell Text -> Shell Text
-toScores = inshell "cut -d, -f3" 
+-- we could just use toCSV "3" instead of defining a new function
+--toScores :: Shell Text -> Shell Text
+--toScores = inshell "cut -d, -f3" 
 
 preScoreCommand :: Model -> Text
 preScoreCommand model = mconcat l 
@@ -81,19 +80,18 @@ main = do
 	let fName = fromString $ inFile opts :: Filename
 	let f = fromString $ inFile opts :: Turtle.FilePath
 	let model = fromString $ inModel opts :: Model
-	--let f = defaultFilePath
-	--let fName = defaultFile
-	--let model = defaultModel
+	let sCols = fromString $ scoreCols opts :: Text
+	let vCols = fromString $ valCols opts :: Text
 	let fCSV = f <.> "csv"
 	let fIDs = f <.> "ids_labels"
 	let fScoreD = f <.> "csv_scored"
 	let fScores = fScoreD <.> "scores"
-	output fCSV $ toCSV $ input f
-	output fIDs $ toIdsLabels $ input f
+	output fCSV $ toCSV sCols $ input f
+	output fIDs $ toCSV vCols $ input f
 	shell (preScoreCommand model) empty
 	shell (scoreCommand model (fName <> ".csv")) empty
-	output fScores $ toScores $ input fScoreD
-
+	--output fScores $ toScores $ input fScoreD
+	output fScores $ toCSV "3" $ input fScoreD
 
 -- Since lines :: String -> [String], I need something equivalent that works on Turtle.Text.
 -- I'm sure there is a function someplace....
