@@ -67,6 +67,19 @@ scoreCommand model input = mconcat l
 		, " --output " <> input <> "_scored"
 		]
 
+toCSV2 :: Text -> Filename -> Filename -> Text
+toCSV2 cols infile outfile = mconcat l 
+	where l = [
+		"cat " <> infile
+		, " | "
+		, "tr $'\t' ,"
+		, " | "
+		, " cut -d, -f"
+		, cols
+		, " > " <> outfile
+		]
+
+
 main = do
 	opts <- cmdArgs options
 	let fName = fromString $ inFile opts :: Filename
@@ -78,11 +91,20 @@ main = do
 	let fIDs = f <.> "ids_labels"
 	let fScoreD = f <.> "csv_scored"
 	let fScores = fScoreD <.> "scores"
-	output fCSV $ toCSV sCols $ input f
-	output fIDs $ toCSV vCols $ input f
+	--output fCSV $ toCSV sCols $ input f
+	--output fIDs $ toCSV vCols $ input f
 	shell (preScoreCommand model) empty
 	shell (scoreCommand model (fName <> ".csv")) empty
-	output fScores $ toCSV "3" $ input fScoreD
+	--output fScores $ toCSV "3" $ input fScoreD
+
+{-
+Removing all the the operations that use "inshell" commands, this runs equally well with runhaskell and comnpiled. So there is something weird about "inshell"
+is the way it seems.
+Is it any different if we define toCSV in its own module and import it? Doesn't seem to help.
+Since all of the "shell" functions work fine, let's try redoing toCSV as a "shell" function
+-}
+
+
 
 -- Since lines :: String -> [String], I need something equivalent that works on Turtle.Text.
 -- I'm sure there is a function someplace....
