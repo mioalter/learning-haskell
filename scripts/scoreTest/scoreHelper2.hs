@@ -6,17 +6,6 @@ module Main where
 import System.Console.CmdArgs
 import Turtle
 
-{-
-
-List of steps
-* for each file: select columns and make a csv
-* for each file: score
-* for each file: select id column from originalFile, select scores column from scoreFile
-* load into Python, zip together -> instead, zip together the files in this script and adapt the stats script
-
--- BETTER: make one file with all dates in it. 
--}
-
 type Model = Text
 type Filename = Text
 
@@ -39,10 +28,10 @@ options = Options {
 		&= help "A TSV to score"
 	, scoreCols = "2-70"
 		&= typ "COLUMNS TO SCORE"
-		&= help "input cols to model for scoring"
+		&= help "input cols to model e.g. 2-70"
 	, valCols = "1,73,77"
 		&= typ "VALIDATION COLUMNS"
-		&= help "e.g. id, label, matched, date"
+		&= help "such as id, label, matched, date e.g. 1,73,77"
 	}
 	&= summary "A program to score a TSV with a trained H2O model"
 	&= program "POJO Pal v1 (c) Mio"
@@ -79,6 +68,11 @@ toCSV2 cols infile outfile = mconcat l
 		, " > " <> outfile
 		]
 
+zipHelper :: String -> String -> String
+zipHelper a b = a ++ "," ++ b
+
+csvZipper :: [String] -> [String] -> [String]
+csvZipper as bs = zipWith zipHelper as bs
 
 main = do
 	opts <- cmdArgs options
@@ -95,4 +89,13 @@ main = do
 	shell (preScoreCommand model) empty
 	shell (scoreCommand model fCSV) empty
 	shell (toCSV2 "3" fScoreD fScores) empty
+	let gIDs = inFile opts ++ ".ids_labels" :: Prelude.FilePath
+	let gScores = inFile opts ++ ".csv_scored" ++ ".scores" :: Prelude.FilePath
+	let gCombined = inFile opts ++ ".scores_and_labels.csv" :: Prelude.FilePath
+	idLines <- fmap lines $ readFile gIDs
+	scoreLines <- fmap lines $ readFile gScores
+	let combinedLines = csvZipper idLines scoreLines
+	writeFile gCombined $ unlines combinedLines
+
+
 
