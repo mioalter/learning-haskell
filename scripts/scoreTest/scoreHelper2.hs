@@ -6,17 +6,6 @@ module Main where
 import System.Console.CmdArgs
 import Turtle
 
-{-
-
-List of steps
-* for each file: select columns and make a csv
-* for each file: score
-* for each file: select id column from originalFile, select scores column from scoreFile
-* load into Python, zip together -> instead, zip together the files in this script and adapt the stats script
-
--- BETTER: make one file with all dates in it. 
--}
-
 type Model = Text
 type Filename = Text
 
@@ -39,17 +28,17 @@ options = Options {
 		&= help "A TSV to score"
 	, scoreCols = "2-70"
 		&= typ "COLUMNS TO SCORE"
-		&= help "input cols to model for scoring"
+		&= help "input cols to model e.g. 2-70"
 	, valCols = "1,73,77"
 		&= typ "VALIDATION COLUMNS"
-		&= help "e.g. id, label, matched, date"
+		&= help "such as id, label, matched, date e.g. 1,73,77"
 	}
 	&= summary "A program to score a TSV with a trained H2O model"
 	&= program "POJO Pal v1 (c) Mio"
 
-toCSV :: Text -> Shell Text -> Shell Text
--- convert TSV to CSV and select a subset of columns
-toCSV t = inshell ("cut -d, -f" <> t) . sed ("\t" *> return ",")
+--toCSV :: Text -> Shell Text -> Shell Text
+---- convert TSV to CSV and select a subset of columns
+--toCSV t = inshell ("cut -d, -f" <> t) . sed ("\t" *> return ",")
 
 preScoreCommand :: Model -> Text
 preScoreCommand model = mconcat l 
@@ -79,38 +68,34 @@ toCSV2 cols infile outfile = mconcat l
 		, " > " <> outfile
 		]
 
+zipHelper :: String -> String -> String
+zipHelper a b = a ++ "," ++ b
+
+csvZipper :: [String] -> [String] -> [String]
+csvZipper as bs = zipWith zipHelper as bs
 
 main = do
 	opts <- cmdArgs options
-	let fName = fromString $ inFile opts :: Filename
-	let f = fromString $ inFile opts :: Turtle.FilePath
+	let f = fromString $ inFile opts :: Filename
 	let model = fromString $ inModel opts :: Model
 	let sCols = fromString $ scoreCols opts :: Text
 	let vCols = fromString $ valCols opts :: Text
-	let fCSV = f <.> "csv"
-	let fIDs = f <.> "ids_labels"
-	let fScoreD = f <.> "csv_scored"
-	let fScores = fScoreD <.> "scores"
-	--output fCSV $ toCSV sCols $ input f
-	--output fIDs $ toCSV vCols $ input f
+	let fCSV = f <> ".csv"
+	let fIDs = f <> ".ids_labels"
+	let fScoreD = f <> ".csv_scored"
+	let fScores = fScoreD <> ".scores"
+	shell (toCSV2 sCols f fCSV) empty
+	shell (toCSV2 vCols f fIDs) empty
 	shell (preScoreCommand model) empty
-	shell (scoreCommand model (fName <> ".csv")) empty
-	--output fScores $ toCSV "3" $ input fScoreD
+	shell (scoreCommand model fCSV) empty
+	shell (toCSV2 "3" fScoreD fScores) empty
+	let gIDs = inFile opts ++ ".ids_labels" :: Prelude.FilePath
+	let gScores = inFile opts ++ ".csv_scored" ++ ".scores" :: Prelude.FilePath
+	let gCombined = inFile opts ++ ".scores_and_labels.csv" :: Prelude.FilePath
+	idLines <- fmap lines $ readFile gIDs
+	scoreLines <- fmap lines $ readFile gScores
+	let combinedLines = csvZipper idLines scoreLines
+	writeFile gCombined $ unlines combinedLines
 
-{-
-Removing all the the operations that use "inshell" commands, this runs equally well with runhaskell and comnpiled. So there is something weird about "inshell"
-is the way it seems.
-Is it any different if we define toCSV in its own module and import it? Doesn't seem to help.
-Since all of the "shell" functions work fine, let's try redoing toCSV as a "shell" function
--}
 
 
-
--- Since lines :: String -> [String], I need something equivalent that works on Turtle.Text.
--- I'm sure there is a function someplace....
---zipFiles :: Turtle.FilePath -> Turtle.FilePath -> IO ()
---zipFiles f g = do
---	fLines <- lines <$> readFile f
---	gLines <- lines <$> readFile g
---	writeFile outf $ unlines $ zip fLines gLines
---		where outf = (fst $ splitExtension f) <.> "scores_and_labels"
