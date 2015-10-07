@@ -77,7 +77,7 @@ dieRolls n = do
 	a <- die
 	b <- die
 	c <- die
-	return $ sort $ take n [a,b,c]
+	return $ reverse . sort $ take n [a,b,c]
 
 -- Problem! Rolling two dice (for the defenders) is not the same as folling three dice, sorting, and taking the first two
 -- which is what we are doing now by rolling three times, sorting, zipping, adn then taking numRolls.
@@ -144,3 +144,10 @@ makeBattlefield n = Battlefield n 10
 
 -- the problem is just that with equal numbers of atackers and defenders, since the dice rolling rules favor the defenders, the attackers usually lose
 -- ....unless I got the rules wrong? No, I think they're right.
+
+-- Huh, originally had sort rather than reverse.sort on the die rolls.
+-- sorting properly means attackers are much more likely to win.
+-- Okay, this makes sense: attackers are slightly less than 50% likely to win when starting with equal numbers
+-- because ties go to defenders
+-- but the discrepancy isn't huge and probability quickly goes to 1 as number of attackers increases.
+-- Triumphs of modular design: very easy to update.
