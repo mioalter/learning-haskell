@@ -116,7 +116,7 @@ attackersWin bf
 
 invade :: Battlefield -> Rand StdGen Battlefield
 invade bf = case (continueFighting bf) of 
-	True -> do bf' <- battle bf; invade bf'
+	True -> (battle bf) >>= invade
 	False -> return bf
 
 successProb :: Battlefield -> Rand StdGen Double
